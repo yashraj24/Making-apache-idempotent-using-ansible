@@ -1,0 +1,39 @@
+- hosts: myweb
+  tasks:
+    - name: "installing httpd"
+      package: 
+        name: "httpd"
+        state: present 
+      register: httpd_install
+
+    - debug:
+        var: httpd_install
+
+    - name: "Copying web pages"
+      copy:
+        dest: "/var/www/html/index.html"
+        src: "webpage.html"
+    
+      notify: Start service
+
+  handlers:
+    - name: Start service
+      service:
+        name: "httpd"
+        state: restarted
+
+      register: httpd_service
+
+    - debug:
+        var: httpd_service
+
+    - name: turning firewall OFF
+      firewalld:
+        port: "8080/tcp"
+        state: enabled
+        immediate: yes
+
+      register: stop_firewalld
+
+    - debug:
+        var: stop_firewalld
